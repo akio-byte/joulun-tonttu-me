@@ -22,6 +22,8 @@ serve(async (req) => {
     const clientId = Deno.env.get("OBF_CLIENT_ID");
     const clientSecret = Deno.env.get("OBF_CLIENT_SECRET");
     const configuredBadgeId = Deno.env.get("OBF_BADGE_ID");
+    const apiBase = Deno.env.get("OBF_API_BASE")?.replace(/\/$/, "") ||
+      "https://openbadgefactory.com";
     
     if (!clientId || !clientSecret) {
       console.error("OBF credentials not configured");
@@ -48,22 +50,30 @@ serve(async (req) => {
       "Hyvää joulua!",
     ].join("\\n");
 
-    const OBF_API_BASE = "https://openbadgefactory.com";
-    
     // Step 1: Get OAuth2 access token using client credentials
-    console.log("Requesting OBF access token...");
-    
-    const tokenResponse = await fetch(`${OBF_API_BASE}/v1/client/oauth2/token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: clientId,
-        client_secret: clientSecret,
-      }),
-    });
+    console.log("Requesting OBF access token from", `${apiBase}/v1/client/oauth2/token`);
+
+    let tokenResponse: Response;
+
+    try {
+      tokenResponse = await fetch(`${apiBase}/v1/client/oauth2/token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: clientId,
+          client_secret: clientSecret,
+        }),
+      });
+    } catch (connectionError) {
+      console.error("Failed to reach OBF token endpoint:", connectionError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Badge service connection failed" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     console.log("Token response status:", tokenResponse.status);
 
@@ -85,13 +95,23 @@ serve(async (req) => {
     let badgeId = configuredBadgeId;
 
     if (!badgeId) {
-      const badgesResponse = await fetch(`${OBF_API_BASE}/v1/badge/${clientId}`, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
+      let badgesResponse: Response;
+
+      try {
+        badgesResponse = await fetch(`${apiBase}/v1/badge/${clientId}`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (connectionError) {
+        console.error("Failed to reach OBF badge list endpoint:", connectionError);
+        return new Response(
+          JSON.stringify({ success: false, error: "Badge service connection failed" }),
+          { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
 
       console.log("Badges list response status:", badgesResponse.status);
 
@@ -153,21 +173,31 @@ serve(async (req) => {
     // Step 3: Issue the badge to the recipient with email notification
     console.log(`Issuing badge for: ${email}, name: ${name}`);
 
-    const issueResponse = await fetch(`${OBF_API_BASE}/v1/badge/${clientId}/${badgeId}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        recipient: [email],
-        send_email: true,
-        email_subject: "Onnittelut! Sait Joulun Osaaja -osaamismerkin!",
-        email_body: emailBody,
-        email_footer: "Eduro - Joulun Osaaja",
-        email_link_text: "Avaa osaamismerkki",
-      }),
-    });
+    let issueResponse: Response;
+
+    try {
+      issueResponse = await fetch(`${apiBase}/v1/badge/${clientId}/${badgeId}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipient: [email],
+          send_email: true,
+          email_subject: "Onnittelut! Sait Joulun Osaaja -osaamismerkin!",
+          email_body: emailBody,
+          email_footer: "Eduro - Joulun Osaaja",
+          email_link_text: "Avaa osaamismerkki",
+        }),
+      });
+    } catch (connectionError) {
+      console.error("Failed to reach OBF badge issue endpoint:", connectionError);
+      return new Response(
+        JSON.stringify({ success: false, error: "Badge service connection failed" }),
+        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     console.log("Badge issuance response status:", issueResponse.status);
 
