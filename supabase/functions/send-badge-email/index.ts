@@ -18,9 +18,10 @@ serve(async (req) => {
 
   try {
     const { email, name } = await req.json();
-    
+
     const clientId = Deno.env.get("OBF_CLIENT_ID");
     const clientSecret = Deno.env.get("OBF_CLIENT_SECRET");
+    const configuredBadgeId = Deno.env.get("OBF_BADGE_ID");
     
     if (!clientId || !clientSecret) {
       console.error("OBF credentials not configured");
@@ -36,6 +37,16 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const emailBody = [
+      `Hei ${name}!`,
+      "",
+      "Onnittelut! Olet ansainnut Joulun Osaaja -osaamismerkin Eduro Pikkujoulukioskissa.",
+      "",
+      "Voit tarkastella ja jakaa osaamismerkkiäsi alla olevan linkin kautta.",
+      "",
+      "Hyvää joulua!",
+    ].join("\\n");
 
     const OBF_API_BASE = "https://openbadgefactory.com";
     
@@ -69,76 +80,92 @@ serve(async (req) => {
     const accessToken = tokenData.access_token;
     console.log("Access token received successfully");
 
-    // Step 2: Get badge template ID (using client ID as issuer)
-    // The badge ID should be configured - for now we'll use a default pattern
-    const issuerId = clientId.split("@")[0]; // Extract issuer from client_id format
-    
-    // Step 3: Issue the badge with email notification enabled
-    console.log(`Issuing badge for: ${email}, name: ${name}`);
-    
-    // First, get available badges for this issuer
-    const badgesResponse = await fetch(`${OBF_API_BASE}/v1/badge/${issuerId}`, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    // Step 2: Resolve badge template ID (prefer explicit env configuration)
+    console.log("Resolving badge template...");
+    let badgeId = configuredBadgeId;
 
-    console.log("Badges list response status:", badgesResponse.status);
+    if (!badgeId) {
+      const badgesResponse = await fetch(`${OBF_API_BASE}/v1/badge/${clientId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (!badgesResponse.ok) {
-      const errorText = await badgesResponse.text();
-      console.error("Failed to get badges list:", errorText);
-      return new Response(
-        JSON.stringify({ success: false, error: "Failed to retrieve badge templates" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+      console.log("Badges list response status:", badgesResponse.status);
 
-    const badges = await badgesResponse.json();
-    console.log("Available badges count:", Array.isArray(badges) ? badges.length : "N/A");
+      if (!badgesResponse.ok) {
+        const errorText = await badgesResponse.text();
+        console.error("Failed to get badges list:", errorText);
+        return new Response(
+          JSON.stringify({ success: false, error: "Failed to retrieve badge templates" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
 
-    // Find the Joulun Osaaja badge or use the first available badge
-    let badgeId = null;
-    if (Array.isArray(badges) && badges.length > 0) {
-      const jouluBadge = badges.find((b: { name?: string }) => 
-        b.name?.toLowerCase().includes("joulun") || 
-        b.name?.toLowerCase().includes("osaaja")
-      );
-      badgeId = jouluBadge?.id || badges[0].id;
-      console.log("Selected badge ID:", badgeId);
+      const badgeText = await badgesResponse.text();
+      let badges: Array<{ id: string; name?: string }> = [];
+
+      try {
+        const parsed = JSON.parse(badgeText);
+        if (Array.isArray(parsed)) {
+          badges = parsed;
+        } else {
+          throw new Error("Badge response was not an array");
+        }
+      } catch (jsonError) {
+        try {
+          badges = badgeText
+            .split("\n")
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => JSON.parse(line));
+        } catch (ldJsonError) {
+          console.error("Failed to parse badges list:", jsonError, ldJsonError);
+          return new Response(
+            JSON.stringify({ success: false, error: "Invalid badge data received" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      console.log("Available badges count:", badges.length);
+
+      if (Array.isArray(badges) && badges.length > 0) {
+        const jouluBadge = badges.find((b: { name?: string }) =>
+          b.name?.toLowerCase().includes("joulun") ||
+          b.name?.toLowerCase().includes("osaaja")
+        );
+        badgeId = jouluBadge?.id || badges[0].id;
+        console.log("Selected badge ID:", badgeId);
+      } else {
+        console.error("No badges found for issuer");
+        return new Response(
+          JSON.stringify({ success: false, error: "No badge templates configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     } else {
-      console.error("No badges found for issuer");
-      return new Response(
-        JSON.stringify({ success: false, error: "No badge templates configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.log("Using configured badge ID:", badgeId);
     }
 
-    // Step 4: Issue the badge to the recipient with email notification
-    const issueResponse = await fetch(`${OBF_API_BASE}/v1/badge/${issuerId}/${badgeId}`, {
+    // Step 3: Issue the badge to the recipient with email notification
+    console.log(`Issuing badge for: ${email}, name: ${name}`);
+
+    const issueResponse = await fetch(`${OBF_API_BASE}/v1/badge/${clientId}/${badgeId}`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        recipient: [
-          {
-            recipient_email: email,
-            recipient_name: name,
-          }
-        ],
+        recipient: [email],
+        send_email: true,
         email_subject: "Onnittelut! Sait Joulun Osaaja -osaamismerkin!",
-        email_body: `Hei ${name}!\n\nOnnittelut! Olet ansainnut Joulun Osaaja -osaamismerkin Eduro Pikkujoulukioskissa.\n\nVoit tarkastella ja jakaa osaamismerkkiäsi alla olevan linkin kautta.\n\nHyvää joulua!`,
+        email_body: emailBody,
         email_footer: "Eduro - Joulun Osaaja",
         email_link_text: "Avaa osaamismerkki",
-        notify: true,
-        log_entry: {
-          add_log_entry: true,
-          log_entry_text: `Badge issued via Joulun Osaaja kiosk for ${name}`,
-        }
       }),
     });
 
@@ -146,7 +173,7 @@ serve(async (req) => {
 
     if (!issueResponse.ok) {
       const errorText = await issueResponse.text();
-      console.error("Failed to issue badge:", errorText);
+      console.error("Failed to issue badge:", issueResponse.status, errorText);
       return new Response(
         JSON.stringify({ success: false, error: "Failed to issue badge" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
