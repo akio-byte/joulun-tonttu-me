@@ -84,13 +84,12 @@ export const ChristmasWizard = () => {
       }
     } catch (error) {
       console.error("Elf generation error:", error);
-      toast.error("Tonttutaika ei onnistunut tällä kertaa.");
       
-      // Fallback
+      // Fallback - app never crashes, always shows results
       setWizardData((prev) => ({
         ...prev,
         elfImage: prev.photoBase64,
-        elfTitle: "Joulun Osaaja -tonttu",
+        elfTitle: "Joulun Osaaja",
         elfDescription: `Tällä kertaa taika ei onnistunut, mutta olet silti Joulun osaaja, ${wizardData.name}! Sinussa asuu aito jouluhenki ja tiimityöskentelyn taika.`,
       }));
       setCurrentStep("results");

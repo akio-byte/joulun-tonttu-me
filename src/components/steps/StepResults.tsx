@@ -59,11 +59,11 @@ export const StepResults = ({
       }
 
       setBadgeSent(true);
-      toast.success("Osaamismerkki lähetetty sähköpostiisi!");
+      toast.success("Osaamismerkki on lähetetty sähköpostiisi!");
     } catch (error) {
       console.error("Badge sending error:", error);
       toast.error(
-        "Osaamismerkin lähetys epäonnistui. Kokeile hetken päästä uudelleen tai pyydä ohjaajaa apuun."
+        "Osaamismerkin lähetys epäonnistui. Pyydä ohjaajaa tarkistamaan sähköposti ja järjestelmä."
       );
     } finally {
       setIsSendingBadge(false);
@@ -98,7 +98,7 @@ export const StepResults = ({
             {elfDescription}
           </p>
           <p className="mt-4 text-sm text-muted-foreground">
-            Tonttupisteet: <span className="font-bold text-christmas-gold">{score}/15</span>
+            Tonttupisteet: <span className="font-bold text-christmas-gold">{score}/10</span>
           </p>
         </div>
       </div>

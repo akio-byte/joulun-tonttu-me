@@ -39,41 +39,41 @@ export const generatePDF = async ({
   pdf.setLineWidth(1);
   pdf.rect(15, 15, pageWidth - 30, pageHeight - 30, "S");
 
-  // Title
+  // Main Title
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(28);
+  pdf.setFontSize(32);
   pdf.setTextColor(180, 30, 30);
   pdf.text("Joulun Osaaja", pageWidth / 2, 40, { align: "center" });
 
   // Subtitle
   pdf.setFontSize(14);
   pdf.setTextColor(100, 100, 100);
-  pdf.text("Eduro Pikkujoulukioski", pageWidth / 2, 50, { align: "center" });
+  pdf.text("Eduro Pikkujoulukioski", pageWidth / 2, 52, { align: "center" });
 
   // Decorative line
   pdf.setDrawColor(218, 165, 32);
   pdf.setLineWidth(0.5);
-  pdf.line(margin + 30, 58, pageWidth - margin - 30, 58);
+  pdf.line(margin + 30, 60, pageWidth - margin - 30, 60);
 
   // Certificate text
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(12);
   pdf.setTextColor(60, 60, 60);
-  pdf.text("Tämä todistus myönnetään", pageWidth / 2, 72, { align: "center" });
+  pdf.text("Tämä todistus myönnetään", pageWidth / 2, 75, { align: "center" });
 
   // Name
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(24);
+  pdf.setFontSize(28);
   pdf.setTextColor(34, 139, 34);
-  pdf.text(name, pageWidth / 2, 85, { align: "center" });
+  pdf.text(name, pageWidth / 2, 90, { align: "center" });
 
   // Elf image (if available and valid)
   if (elfImage && elfImage.startsWith("data:image")) {
     try {
-      const imgWidth = 60;
-      const imgHeight = 60;
+      const imgWidth = 70;
+      const imgHeight = 70;
       const imgX = (pageWidth - imgWidth) / 2;
-      pdf.addImage(elfImage, "JPEG", imgX, 95, imgWidth, imgHeight);
+      pdf.addImage(elfImage, "JPEG", imgX, 100, imgWidth, imgHeight);
     } catch (error) {
       console.error("Error adding image to PDF:", error);
     }
@@ -81,26 +81,26 @@ export const generatePDF = async ({
 
   // Elf title
   pdf.setFont("helvetica", "bold");
-  pdf.setFontSize(18);
+  pdf.setFontSize(22);
   pdf.setTextColor(218, 165, 32);
-  pdf.text(elfTitle, pageWidth / 2, 170, { align: "center" });
+  pdf.text(elfTitle, pageWidth / 2, 185, { align: "center" });
 
   // Elf description
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(11);
   pdf.setTextColor(60, 60, 60);
   const splitDescription = pdf.splitTextToSize(elfDescription, pageWidth - margin * 2 - 20);
-  pdf.text(splitDescription, pageWidth / 2, 182, { align: "center" });
+  pdf.text(splitDescription, pageWidth / 2, 198, { align: "center" });
 
-  // Score
+  // Score section
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(14);
   pdf.setTextColor(180, 30, 30);
-  pdf.text(`Tonttupisteet: ${score}/15`, pageWidth / 2, 215, { align: "center" });
+  pdf.text(`Tonttupisteet: ${score}/10`, pageWidth / 2, 228, { align: "center" });
 
-  // Decorative line
+  // Decorative line before date
   pdf.setDrawColor(218, 165, 32);
-  pdf.line(margin + 30, 225, pageWidth - margin - 30, 225);
+  pdf.line(margin + 30, 238, pageWidth - margin - 30, 238);
 
   // Date
   const today = new Date();
@@ -112,11 +112,15 @@ export const generatePDF = async ({
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.setTextColor(100, 100, 100);
-  pdf.text(`Myönnetty: ${dateStr}`, pageWidth / 2, 235, { align: "center" });
+  pdf.text(`Myönnetty: ${dateStr}`, pageWidth / 2, 250, { align: "center" });
 
-  // Footer
+  // Footer with copyright
   pdf.setFontSize(9);
-  pdf.text("🎄 Eduro - Joulun Osaaja -todistus 🎄", pageWidth / 2, pageHeight - 20, {
+  pdf.setTextColor(120, 120, 120);
+  pdf.text("© Eduro", pageWidth / 2, pageHeight - 25, { align: "center" });
+  
+  pdf.setFontSize(8);
+  pdf.text("🎄 Joulun Osaaja -todistus 🎄", pageWidth / 2, pageHeight - 18, {
     align: "center",
   });
 
