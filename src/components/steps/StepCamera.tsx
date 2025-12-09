@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, ArrowLeft, ArrowRight, RotateCcw } from "lucide-react";
+import { Camera, ArrowLeft, ArrowRight, RotateCcw, AlertTriangle } from "lucide-react";
 
 interface StepCameraProps {
   onNext: (photoBase64: string) => void;
@@ -83,12 +83,14 @@ export const StepCamera = ({ onNext, onBack }: StepCameraProps) => {
 
       <div className="relative aspect-[4/3] w-full max-w-md mx-auto rounded-2xl overflow-hidden bg-muted border-4 border-christmas-gold shadow-glow">
         {hasPermission === false ? (
-          <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
+          <div className="absolute inset-0 flex items-center justify-center p-6 text-center bg-christmas-red/10">
             <div>
-              <Camera className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-card-foreground font-semibold mb-2">Kamera ei käytettävissä</p>
-              <p className="text-sm text-muted-foreground">
-                Salli kameran käyttö selaimen asetuksista.
+              <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-christmas-gold" />
+              <p className="text-card-foreground font-semibold mb-2 text-lg">
+                Kameraa tarvitaan
+              </p>
+              <p className="text-muted-foreground">
+                Kameraa tarvitaan Joulun Osaajan luomiseen. Pyydä ohjaajaa auttamaan.
               </p>
             </div>
           </div>

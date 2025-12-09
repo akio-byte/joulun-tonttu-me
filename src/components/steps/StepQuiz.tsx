@@ -12,52 +12,22 @@ interface Question {
 const questions: Question[] = [
   {
     id: 1,
-    question: "Mikä on tärkeintä joulussa?",
+    question: "Mikä on joulussa tärkeintä?",
     options: [
-      { emoji: "🎁", text: "Lahjat", points: 1 },
-      { emoji: "🍲", text: "Ruoka", points: 2 },
-      { emoji: "❤️", text: "Yhdessäolo", points: 3 },
-      { emoji: "🌟", text: "Tunnelma", points: 2 },
+      { emoji: "🎁", text: "Lahjat ja yllätykset", points: 2 },
+      { emoji: "🍲", text: "Hyvä ruoka ja herkut", points: 3 },
+      { emoji: "❤️", text: "Yhdessäolo läheisten kanssa", points: 5 },
+      { emoji: "🌟", text: "Jouluinen tunnelma", points: 4 },
     ],
   },
   {
     id: 2,
-    question: "Millainen tonttu olisit työpaikalla?",
+    question: "Miten toimit ryhmässä?",
     options: [
-      { emoji: "🔧", text: "Keksijä-tonttu", points: 3 },
-      { emoji: "📋", text: "Järjestelijä-tonttu", points: 2 },
-      { emoji: "🤝", text: "Tiimi-tonttu", points: 3 },
-      { emoji: "🎨", text: "Luova tonttu", points: 2 },
-    ],
-  },
-  {
-    id: 3,
-    question: "Kuinka varhain aloitat jouluostokset?",
-    options: [
-      { emoji: "📅", text: "Marraskuussa", points: 3 },
-      { emoji: "🎄", text: "Joulukuun alussa", points: 2 },
-      { emoji: "😅", text: "Viime tipassa", points: 1 },
-      { emoji: "🎁", text: "Ympäri vuoden", points: 3 },
-    ],
-  },
-  {
-    id: 4,
-    question: "Mikä on lempijouluherkkusi?",
-    options: [
-      { emoji: "🍪", text: "Piparkakut", points: 2 },
-      { emoji: "⭐", text: "Joulutortut", points: 2 },
-      { emoji: "🍫", text: "Suklaa", points: 1 },
-      { emoji: "🥛", text: "Glögi", points: 3 },
-    ],
-  },
-  {
-    id: 5,
-    question: "Miten vietät jouluaattoa?",
-    options: [
-      { emoji: "👨‍👩‍👧‍👦", text: "Perheen kanssa", points: 3 },
-      { emoji: "🎉", text: "Ystävien kanssa", points: 2 },
-      { emoji: "😌", text: "Rauhassa kotona", points: 2 },
-      { emoji: "✈️", text: "Matkustaen", points: 1 },
+      { emoji: "🎯", text: "Johdan ja organisoin", points: 5 },
+      { emoji: "🤝", text: "Tuen muita ja kuuntelen", points: 4 },
+      { emoji: "💡", text: "Keksin uusia ideoita", points: 3 },
+      { emoji: "🔧", text: "Hoidan käytännön asiat", points: 3 },
     ],
   },
 ];
