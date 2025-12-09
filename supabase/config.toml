@@ -1,1 +1,7 @@
 project_id = "sbpddbpqsbptoskohrfm"
+
+[functions.generate-elf]
+verify_jwt = false
+
+[functions.send-badge-email]
+verify_jwt = false
