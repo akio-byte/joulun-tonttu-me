@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { FileText, Mail, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { generatePDF } from "@/utils/pdfGenerator";
-import { supabase } from "@/integrations/supabase/client";
 
 interface StepResultsProps {
   name: string;
@@ -47,15 +46,30 @@ export const StepResults = ({
 
   const handleSendBadge = async () => {
     if (!email) return;
-    
+
     setIsSendingBadge(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-badge-email", {
-        body: { email, name },
+      const response = await fetch(import.meta.env.VITE_OBF_BRIDGE_URL + "/award-badge", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          elfTitle,
+          elfDescription,
+          score,
+        }),
       });
 
-      if (error || !data?.success) {
-        throw new Error(data?.error || "Badge sending failed");
+      if (!response.ok) {
+        throw new Error(`Badge request failed with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || "Badge sending failed");
       }
 
       setBadgeSent(true);
