@@ -14,6 +14,7 @@ type WizardStep = "info" | "quiz" | "camera" | "generating" | "results";
 interface WizardData {
   name: string;
   email: string;
+  giftWishes: string;
   answers: number[];
   score: number;
   photoBase64: string;
@@ -27,6 +28,7 @@ export const ChristmasWizard = () => {
   const [wizardData, setWizardData] = useState<WizardData>({
     name: "",
     email: "",
+    giftWishes: "",
     answers: [],
     score: 0,
     photoBase64: "",
@@ -43,7 +45,7 @@ export const ChristmasWizard = () => {
     results: 5,
   };
 
-  const handleInfoNext = (data: { name: string; email: string }) => {
+  const handleInfoNext = (data: { name: string; email: string; giftWishes: string }) => {
     setWizardData((prev) => ({ ...prev, ...data }));
     setCurrentStep("quiz");
   };
@@ -123,6 +125,7 @@ export const ChristmasWizard = () => {
           <StepResults
             name={wizardData.name}
             email={wizardData.email}
+            giftWishes={wizardData.giftWishes}
             elfImage={wizardData.elfImage}
             elfTitle={wizardData.elfTitle}
             elfDescription={wizardData.elfDescription}

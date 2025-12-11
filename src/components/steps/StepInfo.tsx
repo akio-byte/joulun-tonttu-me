@@ -2,20 +2,26 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowRight } from "lucide-react";
 
 interface StepInfoProps {
-  onNext: (data: { name: string; email: string }) => void;
+  onNext: (data: { name: string; email: string; giftWishes: string }) => void;
 }
 
 export const StepInfo = ({ onNext }: StepInfoProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [giftWishes, setGiftWishes] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      onNext({ name: name.trim(), email: email.trim() });
+      onNext({
+        name: name.trim(),
+        email: email.trim(),
+        giftWishes: giftWishes.trim()
+      });
     }
   };
 
@@ -57,6 +63,19 @@ export const StepInfo = ({ onNext }: StepInfoProps) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="h-14 text-lg border-2 border-muted focus:border-christmas-gold transition-colors"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="giftWishes" className="text-lg font-semibold text-card-foreground">
+            Lahjatoiveet (valinnainen)
+          </Label>
+          <Textarea
+            id="giftWishes"
+            placeholder="Mitä toivoisit joululahjaksi?"
+            value={giftWishes}
+            onChange={(e) => setGiftWishes(e.target.value)}
+            className="min-h-[100px] text-lg border-2 border-muted focus:border-christmas-gold transition-colors resize-none"
           />
         </div>
 
