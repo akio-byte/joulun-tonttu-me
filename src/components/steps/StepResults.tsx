@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface StepResultsProps {
   name: string;
   email: string;
+  giftWishes: string;
   elfImage: string;
   elfTitle: string;
   elfDescription: string;
@@ -17,6 +18,7 @@ interface StepResultsProps {
 export const StepResults = ({
   name,
   email,
+  giftWishes,
   elfImage,
   elfTitle,
   elfDescription,
@@ -31,6 +33,7 @@ export const StepResults = ({
     try {
       await generatePDF({
         name,
+        giftWishes,
         elfImage,
         elfTitle,
         elfDescription,

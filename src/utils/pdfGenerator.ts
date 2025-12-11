@@ -2,6 +2,7 @@ import jsPDF from "jspdf";
 
 interface PDFData {
   name: string;
+  giftWishes: string;
   elfImage: string;
   elfTitle: string;
   elfDescription: string;
@@ -10,6 +11,7 @@ interface PDFData {
 
 export const generatePDF = async ({
   name,
+  giftWishes,
   elfImage,
   elfTitle,
   elfDescription,
@@ -96,11 +98,26 @@ export const generatePDF = async ({
   pdf.setFont("helvetica", "bold");
   pdf.setFontSize(14);
   pdf.setTextColor(180, 30, 30);
-  pdf.text(`Tonttupisteet: ${score}/10`, pageWidth / 2, 228, { align: "center" });
+  pdf.text(`Tonttupisteet: ${score}/10`, pageWidth / 2, 220, { align: "center" });
+
+  // Gift Wishes (if any)
+  if (giftWishes && giftWishes.trim()) {
+    pdf.setFont("helvetica", "italic");
+    pdf.setFontSize(10);
+    pdf.setTextColor(100, 100, 100);
+    pdf.text("Lahjatoiveet:", pageWidth / 2, 230, { align: "center" });
+
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(60, 60, 60);
+    const splitWishes = pdf.splitTextToSize(giftWishes, pageWidth - margin * 2 - 40);
+    // Limit to 2 lines to fit
+    const limitedWishes = splitWishes.slice(0, 2);
+    pdf.text(limitedWishes, pageWidth / 2, 235, { align: "center" });
+  }
 
   // Decorative line before date
   pdf.setDrawColor(218, 165, 32);
-  pdf.line(margin + 30, 238, pageWidth - margin - 30, 238);
+  pdf.line(margin + 30, 245, pageWidth - margin - 30, 245);
 
   // Date
   const today = new Date();
@@ -112,7 +129,7 @@ export const generatePDF = async ({
   pdf.setFont("helvetica", "normal");
   pdf.setFontSize(10);
   pdf.setTextColor(100, 100, 100);
-  pdf.text(`Myönnetty: ${dateStr}`, pageWidth / 2, 250, { align: "center" });
+  pdf.text(`Myönnetty: ${dateStr}`, pageWidth / 2, 253, { align: "center" });
 
   // Footer with copyright
   pdf.setFontSize(9);
